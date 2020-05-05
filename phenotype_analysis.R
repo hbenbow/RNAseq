@@ -95,4 +95,4 @@ ggplot(pycnidia, aes(x=Genotype, y=Pycnidia, group=Treatment)) +
   geom_text(aes(x=Genotype, y=Pycnidia+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5) +
   ylim(0,70)
 
-
+save.image("~/Documents/bmc/Data/phenotype_data.RData")
