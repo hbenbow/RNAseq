@@ -47,41 +47,52 @@ pp_pyc<-pairwise.wilcox.test(Stigg_Longbow_phenotypes$Pycnidia,Stigg_Longbow_phe
 mymat_chlor<-tri.to.squ(pp_chlor$p.value)
 mymat_pyc<-tri.to.squ(pp_pyc$p.value)
 
-myletters_chlor<-multcompLetters(mymat_chlor,compare="<=",threshold=0.05,Letters=letters)
-myletters_pyc<-multcompLetters(mymat_pyc,compare="<=",threshold=0.05,Letters=letters)
-
-# define function thaty will calculate letters for all pairwise comparisons
-
-
+myletters_chlor<-as.data.frame(multcompLetters(mymat_chlor,compare="<=",threshold=0.05,Letters=letters)$Letters)
+colnames(myletters_chlor)<-"Letters"
+myletters_chlor$Factor<-row.names(myletters_chlor)
+myletters_pyc<-as.data.frame(multcompLetters(mymat_pyc,compare="<=",threshold=0.05,Letters=letters)$Letters)
+colnames(myletters_pyc)<-"Letters"
+myletters_pyc$Factor<-row.names(myletters_pyc)
 
 # Make tables of mean, sd, se and n of phenotype data
-pycnidia<-aggregate(Stigg_Longbow_phenotypes$Pycnidia, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="mean")
-pycnidia$SD<-aggregate(Stigg_Longbow_phenotypes$Pycnidia, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="sd")[,3]
-pycnidia$n<-aggregate(Stigg_Longbow_phenotypes$Pycnidia, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="length")[,3]
-pycnidia$SE<-pycnidia$SD/sqrt(pycnidia$n)
-colnames(pycnidia)<-c("Genotype", "Treatment", "Pycnidia", "SD", "n", "SE")
+
 
 Chlorosis<-aggregate(Stigg_Longbow_phenotypes$Chlorosis, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="mean")
 Chlorosis$SD<-aggregate(Stigg_Longbow_phenotypes$Chlorosis, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="sd")[,3]
 Chlorosis$n<-aggregate(Stigg_Longbow_phenotypes$Chlorosis, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="length")[,3]
 Chlorosis$SE<-Chlorosis$SD/sqrt(Chlorosis$n)
 colnames(Chlorosis)<-c("Genotype", "Treatment", "Chlorosis", "SD", "n", "SE")
+Chlorosis$Factor<-paste(Chlorosis$Genotype, Chlorosis$Treatment)
+Chlorosis<-merge(Chlorosis, myletters_chlor, by="Factor")
 
-ggplot(Chlorosis, aes(x=Genotype, y=Chlorosis)) + 
+
+pycnidia<-aggregate(Stigg_Longbow_phenotypes$Pycnidia, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="mean")
+pycnidia$SD<-aggregate(Stigg_Longbow_phenotypes$Pycnidia, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="sd")[,3]
+pycnidia$n<-aggregate(Stigg_Longbow_phenotypes$Pycnidia, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="length")[,3]
+pycnidia$SE<-pycnidia$SD/sqrt(pycnidia$n)
+colnames(pycnidia)<-c("Genotype", "Treatment", "Pycnidia", "SD", "n", "SE")
+pycnidia$Factor<-paste(pycnidia$Genotype, pycnidia$Treatment)
+pycnidia<-merge(pycnidia, myletters_pyc, by="Factor")
+
+
+
+ggplot(Chlorosis, aes(x=Genotype, y=Chlorosis, group=Treatment)) + 
   geom_bar(aes(fill=Treatment),position="dodge", stat="identity", alpha=0.7) + 
   theme_classic() + theme(legend.position = "right") + 
   geom_errorbar(aes(ymin=Chlorosis - SE, ymax= Chlorosis+SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
   scale_fill_manual(values=c("black","grey50"), labels=c("Tween20", expression(paste(italic("Z. tritici"))))) + 
   ylab("Percentage leaf area bearing chlorosis") + 
   theme(text = element_text(size=20, colour="black"), axis.text.x = element_text(colour="black")) +
-  ylim(0,70)
+  geom_text(aes(x=Genotype, y=Chlorosis+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1)
 
-ggplot(pycnidia, aes(x=Genotype, y=Pycnidia)) + 
+
+ggplot(pycnidia, aes(x=Genotype, y=Pycnidia, group=Treatment)) + 
   geom_bar(aes(fill=Treatment),position="dodge", stat="identity", alpha=0.7) + 
   theme_classic() + theme(legend.position = "right") + 
   geom_errorbar(aes(ymin=Pycnidia - SE, ymax= Pycnidia+SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
   scale_fill_manual(values=c("black","grey50"), labels=c("Tween20", expression(paste(italic("Z. tritici"))))) + 
-  ylab("Percentage leaf area bearing pycnidia") + 
+  ylab("Percentage leaf area bearing Pycnidia") + 
   theme(text = element_text(size=20, colour="black"), axis.text.x = element_text(colour="black")) +
-  ylim(0,60)
+  geom_text(aes(x=Genotype, y=Pycnidia+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1)
+
 
