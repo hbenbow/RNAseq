@@ -33,7 +33,7 @@ vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
 # generate PC1 and PC2 for visualisation
 pcaData <- plotPCA(vsd, intgroup=c("Treatment", "Timepoint", "Genotype", "Rep"), returnData=TRUE)
 
-# plot PC1 bs PC2
+# plot PC1 vs PC2
 ggplot(pcaData, aes(x=PC1, y=PC2)) + geom_point(aes(colour=Genotype, shape=Treatment), size=4, alpha=0.7) +
   theme_classic() +
   theme(text = element_text(size=20, colour="black"),
