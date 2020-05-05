@@ -55,8 +55,6 @@ colnames(myletters_pyc)<-"Letters"
 myletters_pyc$Factor<-row.names(myletters_pyc)
 
 # Make tables of mean, sd, se and n of phenotype data
-
-
 Chlorosis<-aggregate(Stigg_Longbow_phenotypes$Chlorosis, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="mean")
 Chlorosis$SD<-aggregate(Stigg_Longbow_phenotypes$Chlorosis, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="sd")[,3]
 Chlorosis$n<-aggregate(Stigg_Longbow_phenotypes$Chlorosis, list(Stigg_Longbow_phenotypes$Name, Stigg_Longbow_phenotypes$Treatment), FUN="length")[,3]
@@ -83,7 +81,8 @@ ggplot(Chlorosis, aes(x=Genotype, y=Chlorosis, group=Treatment)) +
   scale_fill_manual(values=c("black","grey50"), labels=c("Tween20", expression(paste(italic("Z. tritici"))))) + 
   ylab("Percentage leaf area bearing chlorosis") + 
   theme(text = element_text(size=20, colour="black"), axis.text.x = element_text(colour="black")) +
-  geom_text(aes(x=Genotype, y=Chlorosis+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1)
+  geom_text(aes(x=Genotype, y=Chlorosis+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5)+
+  ylim(0,70)
 
 
 ggplot(pycnidia, aes(x=Genotype, y=Pycnidia, group=Treatment)) + 
@@ -91,8 +90,9 @@ ggplot(pycnidia, aes(x=Genotype, y=Pycnidia, group=Treatment)) +
   theme_classic() + theme(legend.position = "right") + 
   geom_errorbar(aes(ymin=Pycnidia - SE, ymax= Pycnidia+SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
   scale_fill_manual(values=c("black","grey50"), labels=c("Tween20", expression(paste(italic("Z. tritici"))))) + 
-  ylab("Percentage leaf area bearing Pycnidia") + 
+  ylab("Percentage leaf area bearing pycnidia") + 
   theme(text = element_text(size=20, colour="black"), axis.text.x = element_text(colour="black")) +
-  geom_text(aes(x=Genotype, y=Pycnidia+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1)
+  geom_text(aes(x=Genotype, y=Pycnidia+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5) +
+  ylim(0,70)
 
 
