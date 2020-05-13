@@ -77,22 +77,22 @@ pycnidia<-merge(pycnidia, myletters_pyc, by="Factor")
 ggplot(Chlorosis, aes(x=Genotype, y=Chlorosis, group=Treatment)) + 
   geom_bar(aes(fill=Treatment),position="dodge", stat="identity", alpha=0.7) + 
   theme_classic() + theme(legend.position = "right") + 
-  geom_errorbar(aes(ymin=Chlorosis - SE, ymax= Chlorosis+SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
+  geom_errorbar(aes(ymin=Chlorosis - 2*SE, ymax= Chlorosis+2*SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
   scale_fill_manual(values=c("black","grey50"), labels=c("Tween20", expression(paste(italic("Z. tritici"))))) + 
   ylab("Percentage leaf area bearing chlorosis") + 
   theme(text = element_text(size=20, colour="black"), axis.text.x = element_text(colour="black")) +
-  geom_text(aes(x=Genotype, y=Chlorosis+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5)+
+  geom_text(aes(x=Genotype, y=Chlorosis+2*SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5)+
   ylim(0,70)
 
 
 ggplot(pycnidia, aes(x=Genotype, y=Pycnidia, group=Treatment)) + 
   geom_bar(aes(fill=Treatment),position="dodge", stat="identity", alpha=0.7) + 
   theme_classic() + theme(legend.position = "right") + 
-  geom_errorbar(aes(ymin=Pycnidia - SE, ymax= Pycnidia+SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
+  geom_errorbar(aes(ymin=Pycnidia - 2*SE, ymax= Pycnidia+2*SE, group=Treatment),position=position_dodge(width=0.9), width=0.5) + 
   scale_fill_manual(values=c("black","grey50"), labels=c("Tween20", expression(paste(italic("Z. tritici"))))) + 
   ylab("Percentage leaf area bearing pycnidia") + 
   theme(text = element_text(size=20, colour="black"), axis.text.x = element_text(colour="black")) +
-  geom_text(aes(x=Genotype, y=Pycnidia+SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5) +
+  geom_text(aes(x=Genotype, y=Pycnidia+2*SE, label=Letters), position=position_dodge(width=0.9), vjust=-1, size=5) +
   ylim(0,70)
 
 save.image("~/Documents/bmc/Data/phenotype_data.RData")

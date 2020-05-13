@@ -9,12 +9,17 @@ allowWGCNAThreads()
 # Import kallisto files with txi 
 # ==================================================================================
 # Use these steps to import kallisto files
-samples<-as.data.frame(dir("Samples/"))
-files <- file.path(samples$`dir("Samples/")`, "abundance.h5")
+samples<-dir("~/Documents/bmc/Data/samples/") # where the directory 'samples'
+# contains the kallisto output directories - 1 per sample.
+files <- file.path(samples, "abundance.h5")
 names(files) <- paste0(samples)
-all(file.exists(files))
+all(file.exists(files)) # need to navigate into samples directory for this to work!!
 txi.kallisto.tsv <- tximport(files, type = "kallisto", countsFromAbundance = "scaledTPM", ignoreAfterBar = TRUE, txIn=TRUE, txOut=TRUE)
+colData<-read.csv("~/Documents/bmc/Data/colData.csv")
+setwd("~/Documents/bmc/Data/")
+colData$Timepoint<-as.factor(colData$Timepoint)
 # ==================================================================================
+
 
 # if already have a txi object, load it with the metadata (colData)
 load("~/Documents/bmc/Data/txi_and_colData.RData")
