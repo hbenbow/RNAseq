@@ -85,6 +85,7 @@ test<-strsplit(chroms, split="")
 chroms<-do.call(rbind.data.frame, test)
 colnames(chroms)<-c("Chromosome", "Genome")
 unique_gene<-cbind(unique_gene, chroms)
+write.csv(unique_gene, file="~/Documents/bmc/Data/all_expressed_genes.csv")
 tab<-
   as.data.frame(table(unique_gene$Chromosome, unique_gene$Genome))
 colnames(tab)<-c("Chromosome", "Genome", "Frequency")
