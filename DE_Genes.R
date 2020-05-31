@@ -17,7 +17,7 @@ options(scipen = 999)
 
 allowWGCNAThreads()
 
- # all DE genes from larger DE analysis set, extract subgroups of DE genes by timepoint and cultivar
+# all DE genes from larger DE analysis set, extract subgroups of DE genes by timepoint and cultivar
 
 all_expressed_genes <- read.csv("~/Documents/bmc/Data/all_expressed_genes.csv", row.names=1)
 all_significant <- 
@@ -26,19 +26,62 @@ all_significant<-
   all_significant[(all_significant$Cultivar=="Stigg" | all_significant$Cultivar=="Longbow"),]
 all_significant<- all_significant[- grep("LC", all_significant$ID),]
 
+
+# lets check that all the DEGs are in the expressed gene set, and remove ones that are not
+not_expressed_DEGs<-
+  subset(all_significant, 
+         !(all_significant$gene  %in% all_expressed_genes$GeneID))
+all_significant<-all_significant[!(all_significant$gene==unique(not_expressed_DEGs$gene)),]
+# ==================================================================
+# lets look at genome distribution of DE genes
+all_significant$Gene<-all_significant$gene
+all_significant<- all_significant %>% 
+  separate(Gene, c("dead", "Chromosome"), sep="S")
+all_significant$dead<-NULL
+all_significant <-all_significant %>%
+  separate(Chromosome, into=c("Chrom", "dead"), sep="0", extra="drop")
+all_significant$dead<-NULL
+all_significant$Chrom<-str_replace(all_significant$Chrom, "U", "UU")
+chroms<-all_significant$Chrom
+test<-strsplit(chroms, split="")
+chroms<-do.call(rbind.data.frame, test)
+colnames(chroms)<-c("Chromosome", "Genome")
+all_significant<-cbind(all_significant, chroms)
+
+tab<-
+  as.data.frame(table(all_significant$Chromosome, all_significant$Genome))
+colnames(tab)<-c("Chromosome", "Genome", "Frequency")
+
+write.csv(all_significant, file="~/Documents/bmc/Data/DE_genes/all_significant.csv")
+
+# figure 3 sort this out
+ggplot(genome_percentage, aes(x=Cultivar, y=Percentage, group=Genome)) + 
+  theme_bw() +
+  geom_bar(stat="identity", aes(fill=Genome), position="dodge") + 
+  scale_fill_manual(values=c("grey80", "grey60", "grey40", "black")) + ylab("Percentage of differentially expressed genes")  +
+  facet_grid(Regulation~Timepoint) +
+  theme(text = element_text(size=15, colour="black")) +
+  geom_point(aes(y=Expected,group=Genome),colour="blue", size=3, position = position_dodge(width=0.9)) +
+  geom_hline(aes(yintercept=32))
+
+# ==================================================================
+# export plain text files of lists of genes that are DE in each timepoint/cultivar/regulation combination
+# these files can be used in OmicsBox for GO enrichment analysis
 for(cultivar in c("Stigg", "Longbow")){
   # for(t in c(6, 24, 48, 96)){
-    for(r in c("Up", "Down")){
-      data<-all_significant[(all_significant$Cultivar==cultivar),]
-      data<-data[(data$Timepoint==t),]
-      data<-data[(data$Regulation==r),]
-      assign(paste(cultivar, t, r), data)
-      genes<-data$ID
-      write.table(genes, file=paste("~/Documents/bmc/Data/DE_genes/", cultivar, r, ".txt", sep=""), row.names = F, quote=F, col.names = F)
-    }
+  for(r in c("Up", "Down")){
+    data<-all_significant[(all_significant$Cultivar==cultivar),]
+    data<-data[(data$Timepoint==t),]
+    data<-data[(data$Regulation==r),]
+    assign(paste(cultivar, t, r), data)
+    genes<-data$ID
+    write.table(genes, file=paste("~/Documents/bmc/Data/DE_genes/", cultivar, r, ".txt", sep=""), row.names = F, quote=F, col.names = F)
   }
+}
 # }
 
+# ==================================================================
+# read in the output of the OmicsBox GO enrichment analysis and make graphs of the enriched categories
 l48u <- read.delim("~/Documents/bmc/Data/DE_genes/l48u.txt")
 l24u <- read.delim("~/Documents/bmc/Data/DE_genes/l24u.txt")
 
@@ -72,7 +115,7 @@ mp_24<-l24up[(l24up$GO.Category=="MOLECULAR_FUNCTION"),]
 mp_24<-mp_24[order(-mp_24$Difference),]
 
 # bp24_graph<-
-  ggplot(bp_24[1:40,], aes(x = reorder(GO.Name, Difference), y=Percentage)) +
+ggplot(bp_24[1:40,], aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   geom_col(aes(fill=Set), position="dodge") + coord_flip() +
   scale_fill_manual(values=c("grey60", "grey40"),
                     labels=c("Reference Set", "SSP Set")) +
@@ -85,39 +128,40 @@ mp_24<-mp_24[order(-mp_24$Difference),]
   scale_y_continuous()+
   xlab(("Gene Ontology Term"))+
   labs(fill = "Gene Set") 
-  
-  # mp24_graph<-
-  ggplot(mp_24, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
-    geom_col(aes(fill=Set), position="dodge") + coord_flip() +
-    scale_fill_manual(values=c("grey60", "grey40"),
-                      labels=c("Reference Set", "SSP Set")) +
-    theme_bw()+
-    theme(text = element_text(size=15, colour="black"), 
-          axis.text.x = element_text(colour="black"), 
-          axis.text.y=element_text(colour="black"),
-          legend.position = "none")+
-    scale_x_discrete(labels = wrap_format(40))+
-    scale_y_continuous()+
-    xlab(("Gene Ontology Term"))+
-    labs(fill = "Gene Set") 
-  
-  mp_48<-l48up[(l48up$GO.Category=="MOLECULAR_FUNCTION"),]
-  mp_48<-mp_48[order(-mp_48$Difference),]
 
-  # mp48_graph<-
-  ggplot(mp_48, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
-    geom_col(aes(fill=Set), position="dodge") + coord_flip() +
-    scale_fill_manual(values=c("grey60", "grey40"),
-                      labels=c("Reference Set", "SSP Set")) +
-    theme_bw()+
-    theme(text = element_text(size=15, colour="black"), 
-          axis.text.x = element_text(colour="black"), 
-          axis.text.y=element_text(colour="black"),
-          legend.position = "none")+
-    scale_x_discrete(labels = wrap_format(40))+
-    scale_y_continuous()+
-    xlab(("Gene Ontology Term"))+
-    labs(fill = "Gene Set") 
+# mp24_graph<-
+ggplot(mp_24, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
+  geom_col(aes(fill=Set), position="dodge") + coord_flip() +
+  scale_fill_manual(values=c("grey60", "grey40"),
+                    labels=c("Reference Set", "SSP Set")) +
+  theme_bw()+
+  theme(text = element_text(size=15, colour="black"), 
+        axis.text.x = element_text(colour="black"), 
+        axis.text.y=element_text(colour="black"),
+        legend.position = "none")+
+  scale_x_discrete(labels = wrap_format(40))+
+  scale_y_continuous()+
+  xlab(("Gene Ontology Term"))+
+  labs(fill = "Gene Set") 
+
+mp_48<-l48up[(l48up$GO.Category=="MOLECULAR_FUNCTION"),]
+mp_48<-mp_48[order(-mp_48$Difference),]
+
+# mp48_graph<-
+ggplot(mp_48, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
+  geom_col(aes(fill=Set), position="dodge") + coord_flip() +
+  scale_fill_manual(values=c("grey60", "grey40"),
+                    labels=c("Reference Set", "SSP Set")) +
+  theme_bw()+
+  theme(text = element_text(size=15, colour="black"), 
+        axis.text.x = element_text(colour="black"), 
+        axis.text.y=element_text(colour="black"),
+        legend.position = "none")+
+  scale_x_discrete(labels = wrap_format(40))+
+  scale_y_continuous()+
+  xlab(("Gene Ontology Term"))+
+  labs(fill = "Gene Set") 
+
 # ==================================================================================
 # clustering
 # heatmap of genes by sample
@@ -150,3 +194,4 @@ select <- order(rowMeans(counts(dds,normalized=TRUE)),
 df <- as.data.frame(colData(dds)[,c("Genotype", "Treatment")])
 pheatmap(assay(dds)[select,], cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
+
