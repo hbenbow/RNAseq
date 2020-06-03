@@ -24,14 +24,14 @@ all_significant <-
   read.csv("~/Documents/bmc/Data/DE_genes/all_significant.csv", row.names=1)
 all_significant<-
   all_significant[(all_significant$Cultivar=="Stigg" | all_significant$Cultivar=="Longbow"),]
-all_significant<- all_significant[- grep("LC", all_significant$ID),]
+# all_significant<- all_significant[- grep("LC", all_significant$ID),]
 
 
 # lets check that all the DEGs are in the expressed gene set, and remove ones that are not
 not_expressed_DEGs<-
   subset(all_significant, 
          !(all_significant$gene  %in% all_expressed_genes$GeneID))
-all_significant<-all_significant[!(all_significant$gene==unique(not_expressed_DEGs$gene)),]
+# all_significant<-all_significant[!(all_significant$gene==unique(not_expressed_DEGs$gene)),]
 # ==================================================================
 # lets look at genome distribution of DE genes
 all_significant$Gene<-all_significant$gene
@@ -67,8 +67,8 @@ ggplot(genome_percentage, aes(x=Cultivar, y=Percentage, group=Genome)) +
 # ==================================================================
 # export plain text files of lists of genes that are DE in each timepoint/cultivar/regulation combination
 # these files can be used in OmicsBox for GO enrichment analysis
-for(cultivar in c("Stigg", "Longbow")){
-  # for(t in c(6, 24, 48, 96)){
+# for(cultivar in c("Stigg", "Longbow")){
+for(t in c(6, 24, 48, 96)){
   for(r in c("Up", "Down")){
     data<-all_significant[(all_significant$Cultivar==cultivar),]
     data<-data[(data$Timepoint==t),]
@@ -79,6 +79,96 @@ for(cultivar in c("Stigg", "Longbow")){
   }
 }
 # }
+
+# ==================================================================
+# subset genes that are DE in Stigg and not in Longbow
+Stigg<-all_significant[(all_significant$Cultivar=="Stigg"),]
+Longbow<-all_significant[(all_significant$Cultivar=="Longbow"),]
+Stigg<-Stigg$ID
+Longbow<-Longbow$ID
+
+Unique_Stigg<-subset(Stigg, !(Stigg %in% Longbow))
+Unique_Stigg_DEG<-subset(all_significant, all_significant$ID %in% Unique_Stigg)
+
+table(Unique_Stigg_DEG$Chromosome, Unique_Stigg_DEG$Genome.3)
+
+# for(t in c()){
+for(r in c("Up", "Down")){
+  data<-Unique_Stigg_DEG[(Unique_Stigg_DEG$Regulation==r),]
+  # data<-data[(data$Regulation==r),]
+  assign(paste(t, r), data)
+  genes<-data$ID
+  write.table(genes, file=paste("~/Documents/bmc/Data/DE_genes/Stigg_sepcific/",  r, ".txt", sep=""), row.names = F, quote=F, col.names = F)
+}
+# }
+
+# ==================================================================
+# subset genes that are DE in Stigg and not in Longbow
+Stigg<-all_significant[(all_significant$Cultivar=="Stigg"),]
+Longbow<-all_significant[(all_significant$Cultivar=="Longbow"),]
+Stigg<-Stigg$ID
+Longbow<-Longbow$ID
+
+Unique_Longbow<-subset(Longbow, !(Longbow %in% Stigg))
+Unique_Longbow_DEG<-subset(all_significant, all_significant$ID %in% Unique_Longbow)
+
+table(Unique_Longbow_DEG$Chromosome, Unique_Longbow_DEG$Genome.3)
+
+# for(t in c()){
+for(r in c("Up", "Down")){
+  data<-Unique_Longbow_DEG[(Unique_Longbow_DEG$Regulation==r),]
+  # data<-data[(data$Regulation==r),]
+  assign(paste(t, r), data)
+  genes<-data$ID
+  write.table(genes, file=paste("~/Documents/bmc/Data/DE_genes/Longbow_specific/",  r, ".txt", sep=""), row.names = F, quote=F, col.names = F)
+}
+# }
+
+L_up<-read.delim("~/Documents/bmc/Data/DE_genes/Longbow_specific/Up_bp.txt")
+L_up$Cultivar<-"Longbow"
+L_up$Regulation<-"Up"
+L_up$GO_Category<-row.names(L_up)
+L_down<-read.delim("~/Documents/bmc/Data/DE_genes/Longbow_specific/Down_bp.txt")
+L_down$Cultivar<-"Longbow"
+L_down$Regulation<-"Down"
+L_down$GO_Category<-row.names(L_down)
+S_up<-read.delim("~/Documents/bmc/Data/DE_genes/Stigg_sepcific/up_bp.txt")
+S_up$Cultivar<-"Stigg"
+S_up$Regulation<-"Up"
+S_up$GO_Category<-row.names(S_up)
+S_down<-read.delim("~/Documents/bmc/Data/DE_genes/Stigg_sepcific/down_bp.txt")
+S_down$Cultivar<-"Stigg"
+S_down$Regulation<-"Down"
+S_down$GO_Category<-row.names(S_down)
+
+
+all_bp<-rbind(L_up, L_down, S_up, S_down)
+all_up<-all_bp[(all_bp$Regulation=="Up"),]
+all_down<-all_bp[(all_bp$Regulation=="Down"),]
+
+write.csv(all_bp, file="~/Documents/bmc/Data/DE_genes/all_bp.csv")
+#   plot<-
+ggplot(S_up[(S_up$GO>=2),], aes(x=as.factor(GO_Category), y=GO)) + 
+  geom_col(aes(fill=Cultivar), position = position_dodge(preserve = "single")) + 
+  # facet_wrap(~Regulation, ncol=1) + 
+  theme_classic() +
+  scale_fill_manual(values=c("grey30", "grey50")) +
+  xlab("Gene Ontology Term") +
+  theme(text = element_text(size=15, colour='black'), axis.text.x = element_text(colour="black")) +
+  ylab("Number of differentially expressed genes") +
+  scale_x_discrete(labels = wrap_format(40))+
+  coord_flip()
+# ggsave(plot, file=paste(i, ".pdf"))
+ggplot(L_up[(L_up$GO>=3),], aes(x=as.factor(GO_Category), y=GO)) + 
+  geom_col(aes(fill=Cultivar), position = position_dodge(preserve = "single")) + 
+  # facet_wrap(~Regulation, ncol=1) + 
+  theme_classic() +
+  scale_fill_manual(values=c("grey30", "grey50")) +
+  xlab("Gene Ontology Term") +
+  theme(text = element_text(size=15, colour='black'), axis.text.x = element_text(colour="black")) +
+  ylab("Number of differentially expressed genes") +
+  scale_x_discrete(labels = wrap_format(40))+
+  coord_flip()
 
 # ==================================================================
 # read in the output of the OmicsBox GO enrichment analysis and make graphs of the enriched categories
@@ -162,36 +252,29 @@ ggplot(mp_48, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   xlab(("Gene Ontology Term"))+
   labs(fill = "Gene Set") 
 
-# ==================================================================================
-# clustering
-# heatmap of genes by sample
+# ==================================================================
+# WRKY TF data
 
+wrkys<-c("TraesCS3A02G347500.1", 
+         "TraesCS3B02G379200.1",
+         "TraesCS3D02G341100.1",
+         "TraesCS6A02G146900.1",
+         "TraesCS6B02G175100.2",
+         "TraesCS6D02G130600.1")
+wrkys_exp<-subset(all_significant, all_significant$ID %in% wrkys)
 
-# Import kallisto files with txi 
+wrkys_exp$Gene_group<-as.factor(c(1, 1, 1, 2, 2, 3))
 
-# Use these steps to import kallisto files
-samples<-dir("~/Documents/bmc/Data/samples/") # where the directory 'samples'
-# contains the kallisto output directories - 1 per sample.
-files <- file.path(samples, "abundance.h5")
-setwd("~/Documents/bmc/Data/samples/")
-names(files) <- paste0(samples)
-all(file.exists(files)) # need to navigate into samples directory for this to work!!
-txi.kallisto.tsv <- tximport(files, type = "kallisto", countsFromAbundance = "scaledTPM", ignoreAfterBar = TRUE, txIn=TRUE, txOut=TRUE)
-colData<-read.csv("~/Documents/bmc/Data/colData.csv")
-setwd("~/Documents/bmc/Data/")
-colData$Timepoint<-as.factor(colData$Timepoint)
-colData$Rep<-as.factor(colData$Rep)
-
-# check that order of samples in metadata and txi object are the same
-order<-colData$Sample
-colData<-colData %>%
-  slice(match(order, Sample))
-
-dds <- DESeqDataSetFromTximport(txi.kallisto.tsv, colData, ~ Treatment + Timepoint + Genotype +  Rep + Treatment:Genotype)
-dds<-estimateSizeFactors(dds)
-select <- order(rowMeans(counts(dds,normalized=TRUE)),
-                decreasing=TRUE)[1:100]
-df <- as.data.frame(colData(dds)[,c("Genotype", "Treatment")])
-pheatmap(assay(dds)[select,], cluster_rows=FALSE, show_rownames=FALSE,
-         cluster_cols=FALSE, annotation_col=df)
-
+ggplot(wrkys_exp, aes(x=ID, y=log2FoldChange)) +
+  geom_bar(stat="identity", aes(fill=Gene_group)) +
+  geom_errorbar(aes(ymin=log2FoldChange-lfcSE, ymax=log2FoldChange+lfcSE), 
+                width=.5) +
+  theme_classic() +
+  scale_fill_manual(values=c("grey30", "grey50", "grey70"),
+                    labels=c("Group 1", "Group 2", "Group 3")) +
+  theme(text = element_text(size=15, colour="black"), 
+        axis.text.x = element_text(colour="black", angle = 50, hjust=1), 
+        axis.text.y=element_text(colour="black")) + 
+  labs(fill="Homologous group") +
+  xlab("Gene ID") + ylab("Log(2) Fold Change")
+  

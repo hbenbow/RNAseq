@@ -56,6 +56,11 @@ rm(order)
 DEGs<-unique(all_significant$gene)
 tpm<-txi.kallisto.tsv$counts
 deg_TPM<-tpm[DEGs,]
+df<-deg_TPM-rowMeans(deg_TPM)
+res_km <- kmeans(df, 100)
+
+test<-prcomp(df)
+
 
 df<-scale(deg_TPM)
 d <- dist(df, method = "euclidean")
