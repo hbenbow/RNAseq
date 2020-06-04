@@ -172,8 +172,8 @@ ggplot(L_up[(L_up$GO>=3),], aes(x=as.factor(GO_Category), y=GO)) +
 
 # ==================================================================
 # read in the output of the OmicsBox GO enrichment analysis and make graphs of the enriched categories
-l48u <- read.delim("~/Documents/bmc/Data/DE_genes/l48u.txt")
-l24u <- read.delim("~/Documents/bmc/Data/DE_genes/l24u.txt")
+l48u <- read.delim("~/Documents/bmc/Data/DE_genes/All_Subsets/l48u.txt")
+l24u <- read.delim("~/Documents/bmc/Data/DE_genes/All_Subsets/l24u.txt")
 
 l24u$Test<-l24u$Nr.Test/l24u$Non.Annot.Test*100
 l24u$Reference<-l24u$Nr.Reference/l24u$Non.Annot.Reference*100
@@ -210,7 +210,7 @@ ggplot(bp_24[1:40,], aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   scale_fill_manual(values=c("grey60", "grey40"),
                     labels=c("Reference Set", "SSP Set")) +
   theme_bw()+
-  theme(text = element_text(size=15, colour="black"), 
+  theme(text = element_text(size=20, colour="black"), 
         axis.text.x = element_text(colour="black"), 
         axis.text.y=element_text(colour="black"),
         legend.position = "none")+
@@ -218,6 +218,7 @@ ggplot(bp_24[1:40,], aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   scale_y_continuous()+
   xlab(("Gene Ontology Term"))+
   labs(fill = "Gene Set") 
+ggsave(file="~/Documents/bmc/Graphs/bp24.pdf")
 
 # mp24_graph<-
 ggplot(mp_24, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
@@ -225,7 +226,7 @@ ggplot(mp_24, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   scale_fill_manual(values=c("grey60", "grey40"),
                     labels=c("Reference Set", "SSP Set")) +
   theme_bw()+
-  theme(text = element_text(size=15, colour="black"), 
+  theme(text = element_text(size=20, colour="black"), 
         axis.text.x = element_text(colour="black"), 
         axis.text.y=element_text(colour="black"),
         legend.position = "none")+
@@ -233,6 +234,7 @@ ggplot(mp_24, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   scale_y_continuous()+
   xlab(("Gene Ontology Term"))+
   labs(fill = "Gene Set") 
+ggsave(file="~/Documents/bmc/Graphs/mf24.pdf")
 
 mp_48<-l48up[(l48up$GO.Category=="MOLECULAR_FUNCTION"),]
 mp_48<-mp_48[order(-mp_48$Difference),]
@@ -241,9 +243,9 @@ mp_48<-mp_48[order(-mp_48$Difference),]
 ggplot(mp_48, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   geom_col(aes(fill=Set), position="dodge") + coord_flip() +
   scale_fill_manual(values=c("grey60", "grey40"),
-                    labels=c("Reference Set", "SSP Set")) +
+                    labels=c("Reference Set", "Test Set")) +
   theme_bw()+
-  theme(text = element_text(size=15, colour="black"), 
+  theme(text = element_text(size=20, colour="black"), 
         axis.text.x = element_text(colour="black"), 
         axis.text.y=element_text(colour="black"),
         legend.position = "none")+
@@ -251,6 +253,7 @@ ggplot(mp_48, aes(x = reorder(GO.Name, Difference), y=Percentage)) +
   scale_y_continuous()+
   xlab(("Gene Ontology Term"))+
   labs(fill = "Gene Set") 
+ggsave(file="~/Documents/bmc/Graphs/legend.pdf")
 
 # ==================================================================
 # WRKY TF data
