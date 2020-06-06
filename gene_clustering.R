@@ -73,9 +73,34 @@ stigg_u<-as.character(unique(stigg_u))
 stigg_u_exp<-subset(all_significant, all_significant$ID %in% stigg_u)
 tpm<-txi.kallisto.tsv$counts
 stigg_u_TPM<-vds[stigg_u,]
+
 df<-stigg_u_TPM
 df<-scale(stigg_u_TPM)
 
+deg_expressed<-as.character(unique(all_significant$ID))
+deg_expressed<-vds[deg_expressed,]
+df<-scale(deg_expressed)
+
+# ==================================================================================
+# shared genes
+all_significant <- 
+  read.csv("~/Documents/S L Fronteirs/all_significant_parents.csv")
+all_significant<-
+  all_significant[(all_significant$Cultivar=="Stigg" | all_significant$Cultivar=="Longbow"),]
+all_significant<- all_significant[- grep("LC", all_significant$ID),]
+
+# ==================================================================
+# subset genes that are DE in Stigg and in Longbow
+Stigg<-all_significant[(all_significant$Cultivar=="Stigg"),]
+Longbow<-all_significant[(all_significant$Cultivar=="Longbow"),]
+Stigg<-as.character(unique(Stigg$ID))
+Longbow<-as.character(unique(Longbow$ID))
+
+shared<-subset(Longbow, Longbow %in% Stigg)
+shared2<-subset(Stigg, Stigg %in% Longbow)
+shared_DEG<-subset(all_significant, all_significant$ID %in% shared)
+shared_exp<-vds[shared2,]
+df<-scale(shared_exp)
 # ==================================================================================
 # elbow method
 set.seed(123)
@@ -120,14 +145,14 @@ fviz_nbclust(df, kmeans, method = "silhouette")
 # compute gap statistic
 set.seed(123)
 gap_stat <- clusGap(df, FUN = kmeans, nstart = 25,
-                    K.max = 10, B = 50)
+                    K.max =50, B = 50)
 # Print the result
 print(gap_stat, method = "firstmax")
 fviz_gap_stat(gap_stat)
 
 # ==================================================================================
 # choose value of k vased on three above methods
-final <- kmeans(df, 3, nstart = 25)
+final <- kmeans(df, 2, nstart = 25)
 
 fviz_cluster(final, data = df)
 

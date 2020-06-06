@@ -103,20 +103,45 @@ Longbow_specific_down$Go_term<-row.names(Longbow_specific_down)
 Longbow_specific_up$Go_term<-row.names(Longbow_specific_up)
 
 
-ggplot(stigg_specific_down, aes(x=reorder(Go_term, GO), y=GO)) +
+ggplot(stigg_specific_down[c(1:10),], aes(x=reorder(Go_term, GO), y=GO)) +
   geom_col() +
   coord_flip() +
   theme_classic()+
-  theme(text = element_text(size=17, colour='black'), axis.text.x = element_text(colour="black"))+
-  scale_x_discrete(labels=wrap_format(50))+
+  theme(text = element_text(size=30, colour='black'), axis.text.x = element_text(colour="black"))+
+  scale_x_discrete(labels=wrap_format(40))+
   ylab("Number of differentially expressed genes") +
-  xlab("Biological process")
+  xlab("Biological process") +
+  scale_y_continuous(labels = scales::number_format(accuracy = 1))
+ggsave("~/Documents/bmc/Graphs/stigg_specific_down.pdf")
 
-ggplot(stigg_specific_up, aes(x=reorder(Go_term, GO), y=GO)) +
+ggplot(stigg_specific_up[c(1:10),], aes(x=reorder(Go_term, GO), y=GO)) +
   geom_col() +
   coord_flip() +
   theme_classic()+
-  theme(text = element_text(size=17, colour='black'), axis.text.x = element_text(colour="black"))+
-  scale_x_discrete(labels=wrap_format(50))+
+  theme(text = element_text(size=30, colour='black'), axis.text.x = element_text(colour="black"))+
+  scale_x_discrete(labels=wrap_format(40))+
+  ylab("Number of differentially expressed genes") +
+  xlab("Biological process") +
+  scale_y_continuous(labels = scales::number_format(accuracy = 1))
+ggsave("~/Documents/bmc/Graphs/stigg_specific_up.pdf")
+
+ggplot(Longbow_specific_up[c(1:10),], aes(x=reorder(Go_term, GO), y=GO)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()+
+  theme(text = element_text(size=30, colour='black'), axis.text.x = element_text(colour="black"))+
+  scale_x_discrete(labels=wrap_format(40))+
   ylab("Number of differentially expressed genes") +
   xlab("Biological process")
+ggsave("~/Documents/bmc/Graphs/longbow_specific_up.pdf")
+
+ggplot(Longbow_specific_down[c(1:10),], aes(x=reorder(Go_term, GO), y=GO)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()+
+  theme(text = element_text(size=30, colour='black'), axis.text.x = element_text(colour="black"))+
+  scale_x_discrete(labels=wrap_format(40))+
+  ylab("Number of differentially expressed genes") +
+  xlab("Biological process")
+ggsave("~/Documents/bmc/Graphs/longbow_specific_down.pdf")
+
