@@ -1,3 +1,56 @@
+library(WGCNA)
+library(tximport)
+library(DESeq2)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(plyr)
+library(stringr)
+library(gplots)
+library(tidyr)
+library(Hmisc)
+library(corrplot)
+library(pheatmap)
+library(RColorBrewer)
+
+allowWGCNAThreads()
+all_significant <- 
+  read.csv("~/Documents/S L Fronteirs/all_significant_parents.csv")
+all_significant<-
+  all_significant[(all_significant$Cultivar=="Stigg" | all_significant$Cultivar=="Longbow"),]
+all_significant<- all_significant[- grep("LC", all_significant$ID),]
+
+# Import kallisto files with txi 
+# ==================================================================================
+# Use these steps to import kallisto files
+samples<-dir("~/Documents/bmc/Data/samples/") # where the directory 'samples'
+# contains the kallisto output directories - 1 per sample.
+files <- file.path(samples, "abundance.h5")
+setwd("~/Documents/bmc/Data/samples/")
+names(files) <- paste0(samples)
+all(file.exists(files)) # need to navigate into samples directory for this to work!!
+txi.kallisto.tsv <- tximport(files, type = "kallisto", countsFromAbundance = "scaledTPM", ignoreAfterBar = TRUE, txIn=TRUE, txOut=TRUE)
+colData<-read.csv("~/Documents/bmc/Data/colData.csv")
+setwd("~/Documents/bmc/Data/")
+colData$Timepoint<-as.factor(colData$Timepoint)
+colData$Rep<-as.factor(colData$Rep)
+rm(files)
+rm(samples)
+rm(order)
+
+
+# check that order of samples in metadata and txi object are the same
+order<-colData$Sample
+colData<-colData %>%
+  slice(match(order, Sample))
+
+dds <- DESeqDataSetFromTximport(txi.kallisto.tsv, 
+                                colData, ~ Treatment + 
+                                  Timepoint + Genotype + Treatment:Genotype)
+vst<-varianceStabilizingTransformation(dds)
+vds<-assay(vst)
+
+
 stigg_spec_PP<-as.character(c("TraesCS6A02G270800.10", 
                               "TraesCS3B02G238800.6", 
                               "TraesCS5A02G225200.1", 
@@ -73,9 +126,9 @@ pp_genes2$Group.1 = factor(pp_genes2$Group.1, levels=c("TraesCS6A02G270800.10",
                                                        "TraesCS6B02G128000.1")) 
 
 
-ggplot(pp_genes2, aes(x=as.factor(Group.3), y=x, group=Group.2))+
+ggplot(pp_genes2[pp_genes2$Group.4=="Stigg",], aes(x=as.factor(Group.3), y=x, group=Group.2))+
   geom_line(aes(colour=Group.2), size=1, alpha=0.7) +
-  facet_grid(Group.4~Group.1) +
+  facet_wrap(Group.1~.) +
   geom_errorbar(aes(ymin=x-SE,ymax=x+SE, colour=Group.2), width=.2, size=1, alpha=0.7)+
   theme_bw() +
   scale_colour_manual(values=c("grey30", "orange"), 
