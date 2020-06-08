@@ -20,7 +20,8 @@ stigg_spec_PP<-c("TraesCS1A02G001900.9",
 "TraesCS7D02G495200.1",
 "TraesCS4A02G013400.1")
 
-
+development<-c("TraesCS2A02G420900.1", "TraesCS7B02G432600.1")
+stigg_spec_PP<-development
 
 other<-c("TraesCS2B02G585100.2",
 "TraesCS3D02G309800.1",
@@ -29,6 +30,14 @@ other<-c("TraesCS2B02G585100.2",
 "TraesCS7D02G495200.1")
 stigg_spec_PP_other
 
+mostactive<-c("TraesCS1D02G053700.2",
+              "TraesCS3B02G238800.7",
+              "TraesCS3D02G177400.1",
+              "TraesCS5A02G068200.1",
+              "TraesCS5A02G179200.1",
+              "TraesCS5D02G130200.2",
+              "TraesCS6A02G273000.1")
+stigg_spec_PP<-mostactive
 
 transport_stigg<-c("TraesCS2A02G391100.1",
 "TraesCS2D02G508800.3" ,
@@ -37,6 +46,9 @@ stigg_spec_PP<-transport_stigg
 
 transport<-c("TraesCS7A02G516600.2", "TraesCS7B02G311400.2", "TraesCS3A02G036600.2")
 stigg_spec_PP<-transport
+
+pp_stigg_gnees<-c("TraesCS3B02G238800.7", "TraesCS3B02G424200.3", "TraesCS5B02G528300.2")
+stigg_spec_PP<-pp_stigg_gnees
 
 pp_fc<-subset(all_significant, all_significant$ID %in% stigg_spec_PP)
 pp_exp<-as.data.frame(vds[stigg_spec_PP,])
@@ -61,9 +73,9 @@ pp_genes2$Group.1 = factor(pp_genes2$Group.1, levels=c("TraesCS6A02G270800.10",
                                                        "TraesCS6B02G128000.1")) 
 
 
-ggplot(pp_genes2[(pp_genes2$Group.4=="Stigg"),], aes(x=as.factor(Group.3), y=x, group=Group.2))+
+ggplot(pp_genes2, aes(x=as.factor(Group.3), y=x, group=Group.2))+
   geom_line(aes(colour=Group.2), size=1, alpha=0.7) +
-  facet_wrap(Group.1~.,ncol=3) +
+  facet_grid(Group.4~Group.1) +
   geom_errorbar(aes(ymin=x-SE,ymax=x+SE, colour=Group.2), width=.2, size=1, alpha=0.7)+
   theme_bw() +
   scale_colour_manual(values=c("grey30", "orange"), 

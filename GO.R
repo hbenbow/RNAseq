@@ -80,6 +80,10 @@ other_Longbow<-as.character(other_Longbow$GO_process)
 
 stigg_BP_other<-subset(other_Stigg, !(other_Stigg %in% other_Longbow))
 stigg_BP_other<-subset(other, other$GO_process %in% stigg_BP_other)
+stigg_BP_other_fc<-subset(all_significant, all_significant$ID %in% stigg_BP_other$X.Seqs)
+stigg_BP_other<-as.character(stigg_BP_other_fc[(stigg_BP_other_fc$Cultivar=="Stigg"),]$ID)
+stigg_BP_other<-subset(other, other$X.Seqs %in% stigg_BP_other)
+write.csv(stigg_BP_other, file="Stigg_BP_other.csv")
 
 ggplot(stigg_BP_other, aes(x=GO_process, y=GO, fill=regulation)) +
   geom_col(aes(fill=factor(regulation, levels=c("Down", "Up"))), position=position_dodge(preserve="single")) +

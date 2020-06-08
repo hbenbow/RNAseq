@@ -62,4 +62,55 @@ plotAnimals(c("LongbowUp", "LongbowDown", "StiggUp", "StiggDown"),
             cat.fontfamily =rep("sans", 4),  cex = rep(1.5, 15), 
             fontfamily = rep("sans", 15), cat.cex=rep(1.5, 4))
 
+setwd("~/Documents/bmc/Data/DE_genes/Shared/")
+
+for(i in dir(pattern=".txt")){
+  data<-read.delim(i)
+  data$go_cat<-row.names(data)
+  ggplot(data, aes(x=reorder(go_cat, GO), y=GO)) +
+    geom_col() +
+    coord_flip() +
+    theme_classic()+
+    theme(text = element_text(size=30, colour='black'), axis.text.x = element_text(colour="black"))+
+    scale_x_discrete(labels=wrap_format(40))+
+    ylab("Number of differentially expressed genes") +
+    xlab("Biological process") +
+    scale_y_continuous(labels = scales::number_format(accuracy = 1))
+  ggsave(paste("~/Documents/bmc/Graphs/", i, ".pdf"))
+}
+
+LuSu<-Shared_genes_for_venn[(Shared_genes_for_venn$LongbowUp==1 & 
+                               Shared_genes_for_venn$StiggUp==1 &
+                               Shared_genes_for_venn$LongbowDown==0 &
+                               Shared_genes_for_venn$StiggDown ==0),]
+LuSu$Category<-"LuSu"
+
+LuSd<-Shared_genes_for_venn[(Shared_genes_for_venn$LongbowUp==1 & 
+                               Shared_genes_for_venn$StiggUp==0 &
+                               Shared_genes_for_venn$LongbowDown==0 &
+                               Shared_genes_for_venn$StiggDown ==1),]
+LuSd$Category<-"LuSd"
+
+LdSd<-Shared_genes_for_venn[(Shared_genes_for_venn$LongbowUp==0 & 
+                               Shared_genes_for_venn$StiggUp==0 &
+                               Shared_genes_for_venn$LongbowDown==1 &
+                               Shared_genes_for_venn$StiggDown ==1),]
+LdSd$Category<-"LdSd"
+
+LdSu<-Shared_genes_for_venn[(Shared_genes_for_venn$LongbowUp==0 & 
+                               Shared_genes_for_venn$StiggUp==1 &
+                               Shared_genes_for_venn$LongbowDown==1 &
+                               Shared_genes_for_venn$StiggDown ==0),]
+LdSu$Category<-"Ldsu"
+
+all<-rbind(LuSu, LuSd, LdSd, LdSu)
+
+shared_exp<-subset(all_significant, all_significant$ID %in% all$Row.Labels)
+shared_exp<-merge(shared_exp, all, by.x="ID", by.y="Row.Labels")
+
+shared_exp<-shared_exp[,c(1, 3, 4, 7, 9, 10, 20)]
+
+
+
+
 

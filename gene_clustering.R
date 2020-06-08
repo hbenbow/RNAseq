@@ -61,6 +61,36 @@ vst<-varianceStabilizingTransformation(dds)
 vds<-assay(vst)
 
 
+# bheatmap of sample distances
+DEGs<-as.character(unique(all_significant$gene))
+deg_TPM<-vds[DEGs,]
+df<-deg_TPM
+
+heatmap(df)
+
+sampleDists <- dist(t(df))
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(colnames(df), sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+
+
+
+
+
+# ==================================================================================
+# make matrix if folc change values of each gene
+all_significant$Factor<-paste(all_significant$Cultivar, all_significant$Timepoint)
+exp_mat<-all_significant[,c(9, 20, 2)]
+exp_mat<-spread(exp_mat, key="Factor", value="log2FoldChange", fill=0)
+row.names(exp_mat)<-exp_mat$ID
+exp_mat$ID<-NULL
+exp_mat<-as.matrix(exp_mat)
+df<-scale(exp_mat)
 # ==================================================================================
 # Stigg specific
 Stigg<-all_significant[(all_significant$Cultivar=="Stigg"),]
