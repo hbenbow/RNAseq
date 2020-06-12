@@ -125,14 +125,14 @@ vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
 
 # generate PC1 and PC2 for visualisation
 pcaData <- plotPCA(vsd, intgroup=c("Treatment", "Timepoint", "Genotype", "Rep"), returnData=TRUE)
-
+pcaData$Sample<-paste(pcaData$Genotype, pcaData$Treatment)
 # plot PC1 vs PC2
-ggplot(pcaData, aes(x=PC1, y=PC2)) + geom_point(aes(colour=Genotype, shape=Treatment), size=5, alpha=0.7) +
+ggplot(pcaData, aes(x=PC1, y=PC2, group=Sample)) + geom_point(aes(colour=Sample), size= 7, alpha=0.9) +
   theme_classic() +
   theme(text = element_text(size=20, colour="black"),
         axis.text.x = element_text(colour="black")) +
-  scale_colour_manual(values=c("black","grey50")) +
-  scale_shape_manual(values=c("circle", "square"), labels=c("Tween20", expression(paste(italic("Z. tritici")))))+
+  scale_colour_manual(values=c("slategray3","dodgerblue", "rosybrown3", "orangered"), 
+                      labels=c("Longbow + Tween20", expression(paste("Longbow + ", italic("Z. tritici"))), "Stigg + Tween20", expression(paste("Stigg + ", italic("Z. tritici"))))) +
   xlab("Principle component 1")+
   ylab("Principle component 2")
 
